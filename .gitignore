@@ -1,0 +1,9 @@
+config.json
+config.local.json
+听众档案.md
+.env
+.DS_Store
+examples/*/.配音/
+examples/*/*.mp3
+._*
+播客/

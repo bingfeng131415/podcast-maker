@@ -1,0 +1,10 @@
+{
+  "env_file": "~/.config/podcast-maker/.env",
+  "speakers": {
+    "男": { "voice_id": "你常用的男声音色 ID" }
+  },
+  "presets": {
+    "本人": { "男": { "voice_id": "你克隆的声音 ID" } }
+  },
+  "send": ["发送命令的第一段", "第二段", "{file}"]
+}

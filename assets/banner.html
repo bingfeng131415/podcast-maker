@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    background: #F5EFE6;
+    font-family: "PingFang SC", "Hiragino Sans GB", -apple-system, sans-serif;
+    color: #1F1B16; position: relative;
+  }
+  .grain { position: absolute; inset: 0;
+    background: radial-gradient(circle at 85% 20%, #F9D9B8 0, transparent 38%),
+                radial-gradient(circle at 70% 95%, #D9E6DA 0, transparent 40%); }
+  .left { position: absolute; left: 88px; top: 84px; width: 620px; }
+  .kicker { font-size: 20px; letter-spacing: 3px; color: #B4572E; font-weight: 600; }
+  h1 { font-family: "SF Mono", Menlo, monospace; font-size: 74px; font-weight: 700; letter-spacing: -2px; margin-top: 18px; }
+  .tag { font-size: 38px; font-weight: 600; line-height: 1.38; margin-top: 26px; }
+  .tag em { font-style: normal; color: #B4572E; }
+  .flow { position: absolute; left: 88px; top: 508px; display: flex; align-items: center; gap: 12px; }
+  .chip { font-size: 19px; font-weight: 500; padding: 9px 16px; border-radius: 999px; background: #fff; border: 1.5px solid #E3D6C4; white-space: nowrap; }
+  .chip.end { background: #1F1B16; color: #F5EFE6; border-color: #1F1B16; }
+  .arr { color: #B9A88F; font-size: 18px; }
+  .right { position: absolute; right: 84px; top: 92px; width: 470px; }
+  .b { display: flex; gap: 14px; margin-bottom: 22px; align-items: flex-start; }
+  .b.m { flex-direction: row-reverse; }
+  .av { flex: none; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; font-weight: 700; color: #fff; }
+  .f .av { background: #D9774A; } .m .av { background: #3F6B5B; }
+  .bub { background: #fff; border-radius: 22px; padding: 16px 20px; font-size: 22px; line-height: 1.5; box-shadow: 0 6px 20px rgba(80,55,30,.08); max-width: 400px; }
+  .f .bub { border-top-left-radius: 6px; } .m .bub { border-top-right-radius: 6px; background: #FFFDF9; }
+  .bub small { display: block; font-size: 15px; color: #9A8B78; margin-bottom: 4px; }
+  .wave { display: flex; align-items: center; gap: 6px; height: 70px; margin: 18px 0 0 68px; }
+  .wave i { display: block; width: 7px; border-radius: 4px; background: #D9774A; opacity: .85; }
+  .wave i:nth-child(even) { background: #3F6B5B; }
+</style></head>
+<body>
+  <div class="grain"></div>
+  <div class="left">
+    <div class="kicker">AGENT SKILL · 中文对谈播客</div>
+    <h1>podcast-maker</h1>
+    <div class="tag">丢给它一篇文章，<br>路上听<em>两个人</em>把它聊明白。</div>
+  </div>
+    <div class="flow">
+      <span class="chip">链接 / PDF / 英文</span><span class="arr">→</span>
+      <span class="chip">精讲稿</span><span class="arr">→</span>
+      <span class="chip">对谈稿</span><span class="arr">→</span>
+      <span class="chip">体检</span><span class="arr">→</span>
+      <span class="chip end">MP3</span>
+    </div>
+  <div class="right">
+    <div class="b f"><div class="av">女</div><div class="bub"><small>主持人</small>等一下，“中台”是什么？<br>这个词我一听就头大。</div></div>
+    <div class="b m"><div class="av">男</div><div class="bub"><small>讲解者</small>你就当它是公司的收发室，<br>事情先送到这儿，再分下去。</div></div>
+        <div class="wave" id="w"></div>
+  </div>
+<script>
+  const w = document.getElementById('w'), h = [18,34,52,28,60,40,22,48,64,30,44,20,56,36,26,50,62,24,42,32,54,20,38,58,28,46,22,34];
+  h.forEach(x => { const i = document.createElement('i'); i.style.height = x + 'px'; w.appendChild(i); });
+</script>
+</body></html>

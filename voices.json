@@ -1,0 +1,65 @@
+{
+  "provider": "minimax",
+  "providers": {
+    "minimax": {
+      "model": "speech-2.8-hd"
+    },
+    "doubao": {
+      "cluster": "volcano_tts"
+    },
+    "elevenlabs": {
+      "model": "eleven_multilingual_v2"
+    }
+  },
+  "speakers": {
+    "女": {
+      "role": "主持人",
+      "voice_id": "Chinese (Mandarin)_Warm_Bestie",
+      "speed": 1.0,
+      "pitch": 0,
+      "vol": 1.0
+    },
+    "男": {
+      "role": "讲解者",
+      "voice_id": "Chinese (Mandarin)_Reliable_Executive",
+      "speed": 1.0,
+      "pitch": 0,
+      "vol": 1.0
+    }
+  },
+  "presets": {
+    "电台": {
+      "男": {
+        "voice_id": "Chinese (Mandarin)_Radio_Host"
+      }
+    },
+    "高管": {
+      "男": {
+        "voice_id": "Chinese (Mandarin)_Reliable_Executive"
+      }
+    },
+    "温润": {
+      "男": {
+        "voice_id": "Chinese (Mandarin)_Gentleman"
+      }
+    },
+    "豆包示例": {
+      "provider": "doubao",
+      "女": {
+        "voice_id": "填豆包控制台里的女声音色ID"
+      },
+      "男": {
+        "voice_id": "填豆包控制台里的男声音色ID"
+      }
+    },
+    "ElevenLabs示例": {
+      "provider": "elevenlabs",
+      "女": {
+        "voice_id": "填ElevenLabs女声音色ID"
+      },
+      "男": {
+        "voice_id": "填ElevenLabs男声音色ID"
+      }
+    }
+  }
+}
