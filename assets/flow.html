@@ -1,0 +1,59 @@
+<!doctype html>
+<!-- 流程图源文件。改完用 Chrome 截图：
+  chrome --headless=new --hide-scrollbars --force-device-scale-factor=2 --window-size=1280,470 --screenshot=flow.png "file://$PWD/flow.html"
+  英文版在网址后加 ?en -->
+<html><head><meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 470px; overflow: hidden; }
+  body { background: #F5EFE6; font-family: "PingFang SC", -apple-system, "Helvetica Neue", sans-serif; color: #1F1B16; padding: 44px 48px; }
+  h2 { font-size: 26px; font-weight: 700; }
+  h2 span { color: #B4572E; }
+  .row { display: flex; gap: 14px; margin-top: 30px; align-items: stretch; }
+  .step { flex: 1; background: #fff; border-radius: 18px; padding: 20px 18px 18px; position: relative; border: 1.5px solid #E8DCCB; display: flex; flex-direction: column; }
+  .step.last { background: #1F1B16; color: #F5EFE6; border-color: #1F1B16; }
+  .n { width: 34px; height: 34px; border-radius: 50%; background: #D9774A; color: #fff; font-weight: 700; font-size: 18px; display: grid; place-items: center; }
+  .step:nth-child(even) .n { background: #3F6B5B; }
+  .t { font-size: 22px; font-weight: 700; margin-top: 12px; }
+  .d { font-size: 15px; line-height: 1.6; color: #5C5246; margin-top: 8px; flex: 1; }
+  .last .d { color: #D8CCBB; }
+  .f { margin-top: 14px; font-family: "SF Mono", Menlo, monospace; font-size: 14px; background: #F5EFE6; color: #6E4A2E; border-radius: 8px; padding: 6px 10px; display: inline-block; align-self: flex-start; }
+  .last .f { background: #3A332B; color: #F9D9B8; }
+  .arrow { position: absolute; right: -14px; top: 50%; transform: translate(50%, -50%); width: 22px; height: 22px; border-radius: 50%; background: #F5EFE6; color: #B9A88F; display: grid; place-items: center; font-size: 15px; z-index: 2; }
+  .bar { display: flex; gap: 14px; margin-top: 16px; }
+  .chk { flex: 1; font-size: 14px; color: #6E6253; background: #EFE6D9; border-radius: 12px; padding: 10px 14px; line-height: 1.5; }
+  .chk b { color: #1F1B16; }
+</style></head>
+<body>
+<div id="zh">
+  <h2>一期节目是怎么做出来的 <span>· 可以停在任何一步</span></h2>
+  <div class="row">
+    <div class="step"><div class="n">1</div><div class="t">读材料</div><div class="d">公众号、网页取正文；PDF、Word、EPUB 直接读；英文先全文翻成中文</div><div class="f">原文.md · 译文.md</div><div class="arrow">→</div></div>
+    <div class="step"><div class="n">2</div><div class="t">精讲稿</div><div class="d">一句话 + 3～5 个要点 + 值得聊的地方；用【】标出不能漏的观点、数字、人名</div><div class="f">精讲稿.md</div><div class="arrow">→</div></div>
+    <div class="step"><div class="n">3</div><div class="t">对谈稿</div><div class="d">按材料类型和听众写成两人聊天：开场、话题、讨论、自测、结尾</div><div class="f">对谈稿.md</div><div class="arrow">→</div></div>
+    <div class="step"><div class="n">4</div><div class="t">体检</div><div class="d">不花钱：谁说太多、像讲课、太顺、行话、【】有没有漏</div><div class="f">--plan</div><div class="arrow">→</div></div>
+    <div class="step last"><div class="n">5</div><div class="t">配音</div><div class="d">逐句合成 → 听写复查 → 不合格重配 → 对齐音量 → 按停顿和抢话拼接</div><div class="f">标题.mp3</div></div>
+  </div>
+  <div class="bar">
+    <div class="chk"><b>只要精讲稿</b> 停在第 2 步</div>
+    <div class="chk"><b>只要稿子</b> 停在第 4 步，不调用语音服务</div>
+    <div class="chk"><b>改了一句</b> 只重配那一句，其余用缓存</div>
+  </div>
+</div>
+<div id="en" style="display:none">
+  <h2>How an episode is made <span>· stop after any step</span></h2>
+  <div class="row">
+    <div class="step"><div class="n">1</div><div class="t">Read</div><div class="d">Extract web pages and WeChat posts; read PDF, Word, EPUB; translate English sources in full</div><div class="f">原文.md · 译文.md</div><div class="arrow">→</div></div>
+    <div class="step"><div class="n">2</div><div class="t">Brief</div><div class="d">One line + 3–5 key points + what's worth debating; mark must-mention facts with 【】</div><div class="f">精讲稿.md</div><div class="arrow">→</div></div>
+    <div class="step"><div class="n">3</div><div class="t">Script</div><div class="d">A two-host conversation shaped by genre and audience: opening, topics, debate, quiz, close</div><div class="f">对谈稿.md</div><div class="arrow">→</div></div>
+    <div class="step"><div class="n">4</div><div class="t">Health check</div><div class="d">Free: who talks too much, lecture tone, too smooth, jargon, missing 【】 facts</div><div class="f">--plan</div><div class="arrow">→</div></div>
+    <div class="step last"><div class="n">5</div><div class="t">Voice</div><div class="d">Per-line synthesis → transcription check → retake failures → match loudness → assemble</div><div class="f">title.mp3</div></div>
+  </div>
+  <div class="bar">
+    <div class="chk"><b>Brief only</b> stop at step 2</div>
+    <div class="chk"><b>Script only</b> stop at step 4, no TTS calls</div>
+    <div class="chk"><b>Edited one line?</b> only that line is re-voiced</div>
+  </div>
+</div>
+<script>if (location.search.includes('en')) { zh.style.display = 'none'; en.style.display = ''; }</script>
+</body></html>
