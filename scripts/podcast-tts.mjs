@@ -191,8 +191,10 @@ console.log(`  需要新合成 ${todo.length} 句（约 ${todo.reduce((a, u) => 
   const eng = [...new Set((all.match(/[A-Za-z][A-Za-z0-9.+-]*[A-Za-z0-9+]|[A-Za-z]/g) || []).filter((w) => w.length > 1 || /[A-Z]/.test(w)))];
   if (eng.length > 8) warn.push(`英文词和缩写有 ${eng.length} 个（${eng.slice(0, 12).join("、")}${eng.length > 12 ? "…" : ""}）：能用中文说的就换掉，留下的第一次出现时先说中文意思`);
   // 外文原文要先有译文
-  const src = path.join(DIR, "原文.md"), srcLang = existsSync(src) ? (/^>\s*语言：(.+)$/m.exec(readFileSync(src, "utf8").slice(0, 600)) || [])[1] : null;
-  if (srcLang && !existsSync(path.join(DIR, "译文.md"))) warn.push(`原文是${srcLang.trim()}，但文件夹里没有 译文.md：先全文翻成中文，再以译文为底稿写稿（见 references/输入源.md「外文材料」）`);
+  for (const f of readdirSync(DIR).filter((x) => /^原文(-\d+)?\.md$/.test(x))) { // 多篇合一期时是 原文-1.md、原文-2.md……
+    const lang = (/^>\s*语言：(.+)$/m.exec(readFileSync(path.join(DIR, f), "utf8").slice(0, 800)) || [])[1], tr = f.replace("原文", "译文");
+    if (lang && !existsSync(path.join(DIR, tr))) warn.push(`${f} 是${lang.trim()}，但文件夹里没有 ${tr}：先全文翻成中文，再以译文为底稿写稿（见 references/输入源.md「外文材料」）`);
+  }
   // 精讲稿里用【】标的关键信息，对谈稿里都要讲到
   const brief = path.join(DIR, "精讲稿.md");
   if (existsSync(brief)) {
@@ -347,8 +349,13 @@ clips.forEach((c, k) => { for (let i = 0, o = starts[k] * 2; i + 1 < c.length; i
 const pos = cursor / SR;
 const joined = path.join(work, "joined.wav"), mp3 = path.join(DIR, NAME + ".mp3");
 writeWav(joined, [mix]);
-const out = ff(["-y", "-i", joined, "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", String(SR), "-ac", "1", "-c:a", "libmp3lame", "-b:a", "128k", "-metadata", `title=${NAME}`, "-metadata", "genre=Podcast", mp3]);
-rmSync(joined, { force: true });
+// 章节：每个「## 小标题」一章，写进 MP3（支持章节的播放器可以直接跳），也写进节目单
+const chapters = sections.map((sec, i) => { const u = us.find((x) => x.turn > sec.from); return u ? { name: sec.name, start: u.start } : null; }).filter(Boolean)
+  .map((c, i, a) => ({ ...c, end: a[i + 1] ? a[i + 1].start : pos }));
+const metaFile = path.join(work, "chapters.txt"), escMeta = (s) => s.replace(/[=;#\\\n]/g, (c) => "\\" + c);
+writeFileSync(metaFile, ";FFMETADATA1\n" + chapters.map((c) => `[CHAPTER]\nTIMEBASE=1/1000\nSTART=${Math.round(c.start * 1000)}\nEND=${Math.round(c.end * 1000)}\ntitle=${escMeta(c.name)}\n`).join(""));
+const out = ff(["-y", "-i", joined, "-i", metaFile, "-map", "0:a", "-map_metadata", "1", "-map_chapters", "1", "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", String(SR), "-ac", "1", "-c:a", "libmp3lame", "-b:a", "128k", "-id3v2_version", "3", "-metadata", `title=${NAME}`, "-metadata", "genre=Podcast", mp3]);
+rmSync(joined, { force: true }); rmSync(metaFile, { force: true });
 if (out.status !== 0) { console.error("拼接失败：" + out.stderr.slice(-300)); process.exit(1); }
 
 // ---------- 5. 报告 ----------
@@ -359,7 +366,27 @@ writeFileSync(path.join(work, "报告.md"), `# 配音报告 · ${NAME}\n\n- 时�
   LABELS.map((l) => `- ${l}（${SPEAKERS[l].role || ""}）：${SPEAKERS[l].voice_id}，音量补偿 ${(gain[l] || 0).toFixed(1)} dB`).join("\n") +
   `\n- ${asr}\n- 重生成过的句子：${retried} 句\n\n| # | 时间 | 谁 | 文字 | 情绪 | 句后停顿 | 版本 | 听写相似度 |\n|---|---|---|---|---|---|---|---|\n` +
   us.map((u, k) => `| ${k + 1} | ${mmss(u.start)} | ${u.speaker} | ${u.text.replace(/\|/g, "／")} | ${u.emotion}${u.overlap ? (u.overlap > 0.2 ? " 抢话" : " 快接") : ""} | ${u.pause_after} | ${T(u).length} 版选 ${pick(u).file.match(/v\d+/)[0]} | ${pick(u).sim?.toFixed(2) ?? "-"}${pick(u).sim < 0.72 && pick(u).heard ? `（听成：${pick(u).heard.replace(/\|/g, "／").slice(0, 60)}）` : ""}${okBasic(pick(u), u) ? "" : " 质检没过"} |`).join("\n") + "\n");
+// ---------- 6. 附带的学习材料：自测题、闪卡、节目单 ----------
+const clean = (s) => s.replace(/\([a-z-]+\)/gi, "").replace(/<#[\d.]+#>/g, "").replace(/\s+/g, " ").trim();
+const quiz = []; // 自测题：后面跟着 [停 N 秒] 的那句是问题，之后到下一题或下一段之前是答题思路
+turns.forEach((t, i) => { if (!(t.extraPause >= 4)) return; const ans = []; for (let j = i + 1; j < turns.length && !(turns[j].extraPause >= 4); j++) { ans.push(clean(turns[j].text)); if (turns[j].sectionEnd) break; }
+  const q = clean(t.text).replace(/^.*?(第[一二三四五六七八九十\d]+[个道]?(?:问题)?[：:，,]\s*)/, ""); quiz.push({ q, a: ans.join(" ") }); });
+const extras = [];
+if (quiz.length) {
+  writeFileSync(path.join(DIR, "自测.md"), `# 自测 · ${NAME}\n\n先自己答，再看答题思路。\n\n` + quiz.map((x, i) => `**${i + 1}. ${x.q}**\n\n<details><summary>答题思路</summary>\n\n${x.a}\n\n</details>\n`).join("\n"));
+  const csv = (s) => `"${s.replace(/"/g, '""')}"`;
+  writeFileSync(path.join(DIR, "闪卡.csv"), quiz.map((x) => `${csv(x.q)},${csv(x.a)}`).join("\n") + "\n"); // 可以直接导入 Anki 等闪卡软件（正面,背面）
+  extras.push("自测.md", "闪卡.csv");
+}
+{
+  const srcs = readdirSync(DIR).filter((x) => /^原文(-\d+)?\.md$/.test(x)).sort().map((f) => { const s = readFileSync(path.join(DIR, f), "utf8").slice(0, 1200); const ti = (/^#\s+(.+)$/m.exec(s) || [])[1] || f, from = (/^>\s*来源：(.+)$/m.exec(s) || [])[1] || "", by = (/^>\s*作者：(.+)$/m.exec(s) || [])[1] || ""; const url = (/(https?:\/\/\S+)/.exec(from) || [])[1]; return `- ${url ? `[${ti}](${url})` : ti}${by ? `（${by}）` : ""}`; });
+  const briefF = path.join(DIR, "精讲稿.md"), one = existsSync(briefF) ? ((/##\s*一句话\s*\n+([^\n#][^\n]*)/.exec(readFileSync(briefF, "utf8")) || [])[1] || "").replace(/【([^】]+)】/g, (m, k) => k.split(/[\/／|]/)[0]).replace(/\s*[（(][①-⑳\d、，, ]+[)）]/g, "").replace(/\s*（(看法|延伸)）/g, "") : "";
+  writeFileSync(path.join(DIR, "节目单.md"), `# ${NAME}\n\n时长 ${mmss(pos)}\n\n` + (one ? `${one}\n\n` : "") + (chapters.length ? "## 章节\n\n" + chapters.map((c) => `- ${mmss(c.start)} ${c.name}`).join("\n") + "\n\n" : "") +
+    (quiz.length ? "## 自测\n\n" + quiz.map((x, i) => `${i + 1}. ${x.q}`).join("\n") + "\n\n答题思路见 自测.md。\n\n" : "") + (srcs.length ? "## 来源\n\n" + srcs.join("\n") + "\n" : ""));
+  extras.unshift("节目单.md");
+}
 console.log(`做好了：${mp3}`);
+console.log(`  附带：${extras.join("、")}${chapters.length ? `；MP3 里写了 ${chapters.length} 个章节` : ""}`);
 if (flag("--send")) { // 做完发到手机：命令写在用户配置的 send 里，{file} 换成 MP3 文件名、{title} 换成标题（在这一期的文件夹里执行）
   const cmd = LOCAL.send;
   if (!Array.isArray(cmd) || !cmd.length) console.log(`  没有发送：${path.join(USER_DIR, "config.json")} 里没有 send 命令`);

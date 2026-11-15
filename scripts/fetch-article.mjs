@@ -29,7 +29,8 @@ if (/^https?:\/\//i.test(src)) {
 else die(2, "找不到这个文件：" + src);
 
 // ---------- 工具 ----------
-const decode = (s) => s.replace(/&nbsp;|&#160;|&#xa0;/gi, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
+const ENT = { emsp: " ", ensp: " ", thinsp: " ", ldquo: "“", rdquo: "”", lsquo: "‘", rsquo: "’", mdash: "—", ndash: "–", hellip: "…", middot: "·", times: "×", deg: "°", yen: "¥", copy: "©" };
+const decode = (s) => s.replace(/&([a-z]+);/gi, (m, n) => ENT[n.toLowerCase()] ?? m).replace(/&nbsp;|&#160;|&#xa0;/gi, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
   .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d)).replace(/&amp;/g, "&");
 const meta = (name) => { const m = new RegExp(`<meta[^>]+(?:property|name)=["']${name}["'][^>]*content=["']([^"']*)["']`, "i").exec(html) || new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]*(?:property|name)=["']${name}["']`, "i").exec(html); return m ? decode(m[1]).trim() : ""; };
 // 取某个起始标签开始、到它配对的结束标签为止的整段（按同名标签计数）
@@ -88,7 +89,7 @@ if (/mp\.weixin\.qq\.com/.test(url) || /id=["']js_content["']/.test(html)) {
   body = best ? toText(best.b) : "";
   if (body.length < 300) body = toText(block(h, /<body\b[^>]*>/i) || h);
 }
-title = decode(title || "").trim();
+title = decode(title || "").trim().replace(/\s*[-_|｜–—]\s*(新华网|人民网|央视网|中国政府网|[^-_|｜–—]{2,20}(网|办公室|委员会|官网|频道))$/, ""); // 去掉标题末尾的网站名
 const textLen = body.replace(/\[图片[^\]]*\]|[#>*\-\s`]/g, "").length;
 if (textLen < 200) die(4, `只取到 ${textLen} 个字，页面多半是靠 JavaScript 加载正文的，改用浏览器打开再取文字`);
 
